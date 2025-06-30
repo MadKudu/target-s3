@@ -9,7 +9,7 @@ plugins:
   loaders:
   - name: target-s3
     namespace: target_s3
-    pip_url: -e .
+    pip_url: git+https://github.com/MadKudu/target-s3.git@fix/json_serialisation_dt
     capabilities:
     - about
     - stream-maps

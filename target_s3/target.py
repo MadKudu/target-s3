@@ -196,6 +196,12 @@ class Targets3(Target):
             required=False,
             description="List of key-value strings (e.g., 'tenant=${TENANT}') to prepend as partitions in the S3 key path after the stream name.",
         ),
+        th.Property(
+            "tenant",
+            th.StringType,
+            required=False,
+            description="Optional tenant string to prefix S3 folder names.",
+        ),
     ).to_dict()
 
     default_sink_class = s3Sink
