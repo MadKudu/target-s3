@@ -196,6 +196,12 @@ class Targets3(Target):
             required=False,
             description="List of key-value strings (e.g., 'tenant=${TENANT}') to prepend as partitions in the S3 key path after the stream name.",
         ),
+        th.Property(
+            "dynamic_dt",
+            th.BooleanType,
+            description="Enable dynamic dt generation for each batch. When enabled, any 'dt=' entries in partition_by will use the current batch timestamp instead of static environment variables.",
+            default=False,
+        ),
     ).to_dict()
 
     default_sink_class = s3Sink

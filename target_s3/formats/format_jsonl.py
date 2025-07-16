@@ -1,14 +1,21 @@
 from datetime import datetime
+from typing import Any
 
-from bson import ObjectId
+try:
+    from bson import ObjectId
+    HAS_BSON = True
+except ImportError:
+    ObjectId = None
+    HAS_BSON = False
+
 from simplejson import JSONEncoder, dumps
 
 from target_s3.formats.format_base import FormatBase
 
 
 class JsonSerialize(JSONEncoder):
-    def default(self, obj: any) -> any:
-        if isinstance(obj, ObjectId):
+    def default(self, obj: Any) -> Any:
+        if HAS_BSON and ObjectId is not None and isinstance(obj, ObjectId):
             return str(obj)
         if isinstance(obj, datetime):
             return obj.isoformat()
@@ -26,7 +33,7 @@ class FormatJsonl(FormatBase):
         return super()._prepare_records()
 
     def _write(self) -> None:
-        return super()._write('\n'.join(map(dumps, self.records)))
+        return super()._write('\n'.join(map(lambda record: dumps(record, cls=JsonSerialize), self.records)))
 
     def run(self) -> None:
         # use default behavior, no additional run steps needed

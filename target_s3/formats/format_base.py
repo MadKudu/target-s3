@@ -115,8 +115,9 @@ class FormatBase(metaclass=ABCMeta):
         # Insert partition_by values after stream_name if present
         partition_path = ""
         if self.partition_by:
-            # partition_by values are inserted as folders after the stream name
-            partition_path = "/".join(self.partition_by) + "/"
+            # Process partition_by values and handle dynamic dt if enabled
+            processed_partitions = self._process_partition_values(batch_start)
+            partition_path = "/".join(processed_partitions) + "/"
         folder_path = f"{self.bucket}/{self.prefix}/{stream_name}/" + partition_path
         file_name = ""
         if self.config["append_date_to_prefix"]:
@@ -132,6 +133,25 @@ class FormatBase(metaclass=ABCMeta):
             file_name += f"{self.create_file_structure(batch_start, grain)}"
 
         return f"{folder_path}{file_name}.{self.extension}.{self.compression}"
+
+    def _process_partition_values(self, batch_start: datetime) -> list:
+        """Process partition_by values and handle dynamic dt if enabled."""
+        processed_partitions = []
+        dynamic_dt_enabled = self.config.get("dynamic_dt", False)
+        
+        for partition in self.partition_by:
+            if dynamic_dt_enabled and partition.startswith("dt="):
+                # Generate dynamic dt based on current batch start time
+                dynamic_dt_value = self._generate_dynamic_dt(batch_start)
+                processed_partitions.append(f"dt={dynamic_dt_value}")
+            else:
+                processed_partitions.append(partition)
+        
+        return processed_partitions
+
+    def _generate_dynamic_dt(self, batch_start: datetime) -> str:
+        """Generate dynamic dt string in the format YYYY-MM-DD-HH-MM."""
+        return f"{batch_start.year}-{batch_start.month:02d}-{batch_start.day:02d}-{batch_start.hour:02d}-{batch_start.minute:02d}"
 
     def create_folder_structure(
         self, batch_start: datetime, grain: int, partition_name_enabled: bool
