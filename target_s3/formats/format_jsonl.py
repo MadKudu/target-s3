@@ -1,13 +1,19 @@
 from datetime import datetime
 from typing import Any
 
+# Optional BSON support for MongoDB ObjectId serialization
+# BSON is not always available, so we gracefully handle the import failure
 try:
     from bson import ObjectId
     HAS_BSON = True
 except ImportError:
+    # If BSON is not installed, ObjectId will be None and HAS_BSON will be False
+    # This allows the code to work without BSON dependency
     ObjectId = None
     HAS_BSON = False
 
+# Use simplejson instead of standard json for better performance and additional features
+# simplejson provides more control over serialization and handles edge cases better
 from simplejson import JSONEncoder, dumps
 
 from target_s3.formats.format_base import FormatBase

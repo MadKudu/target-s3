@@ -151,7 +151,7 @@ class FormatBase(metaclass=ABCMeta):
 
     def _generate_dynamic_dt(self, batch_start: datetime) -> str:
         """Generate dynamic dt string in the format YYYY-MM-DD-HH-MM."""
-        return f"{batch_start.year}-{batch_start.month:02d}-{batch_start.day:02d}-{batch_start.hour:02d}-{batch_start.minute:02d}"
+        return batch_start.strftime("%Y-%m-%d-%H-%M")
 
     def create_folder_structure(
         self, batch_start: datetime, grain: int, partition_name_enabled: bool
