@@ -114,10 +114,12 @@ class FormatBase(metaclass=ABCMeta):
         mapped_stream_name = None
         stream_name_partition = None
         
-        for prefix, directory_name in self.stream_prefix_mapping.items():
+        for prefix, stream_name_details in self.stream_prefix_mapping.items():
             if original_stream_name.startswith(prefix):
-                mapped_stream_name = directory_name
-                stream_name_partition = f"stream_name={original_stream_name}"
+                mapped_stream_name = stream_name_details["name"]
+                partition_key = stream_name_details["partition_name"]
+                partition_value = original_stream_name.split(prefix, 1)[1]
+                stream_name_partition = f"{partition_key}={partition_value}"
                 break
         
         stream_name = (

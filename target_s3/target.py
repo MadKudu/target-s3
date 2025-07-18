@@ -135,9 +135,12 @@ class Targets3(Target):
         th.Property(
             "stream_prefix_mapping",
             th.ObjectType(
-                additional_properties=th.StringType,
+                additional_properties=th.ObjectType(
+                    th.Property("name", th.StringType, required=True),
+                    th.Property("partition_name", th.StringType, required=True),
+                ),
             ),
-            description="Map stream name prefixes to directory names. Format: {'prefix': 'directory_name'}. Matching streams will be written to the directory with the original stream name as a partition key.",
+            description="Map stream name prefixes to directory names with custom partition keys. Format: {'prefix': {'name': 'directory_name', 'partition_name': 'partition_key'}}. Matching streams will be written to the directory with the specified partition key.",
         ),
         th.Property(
             "include_process_date",
