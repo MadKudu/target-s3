@@ -133,6 +133,13 @@ class Targets3(Target):
             description="The S3 key stream name override.",
         ),
         th.Property(
+            "stream_prefix_mapping",
+            th.ObjectType(
+                additional_properties=th.StringType,
+            ),
+            description="Map stream name prefixes to directory names. Format: {'prefix': 'directory_name'}. Matching streams will be written to the directory with the original stream name as a partition key.",
+        ),
+        th.Property(
             "include_process_date",
             th.BooleanType,
             description="A flag indicating whether to append _process_date to record.",

@@ -49,6 +49,7 @@ class FormatBase(metaclass=ABCMeta):
         self.compression = "gz"  # TODO: need a list of compatible compression types
 
         self.stream_name_path_override = config.get("stream_name_path_override", None)
+        self.stream_prefix_mapping = config.get("stream_prefix_mapping", {})
         self.partition_by = config.get("partition_by", [])
 
         if self.cloud_provider.get("cloud_provider_type", None) == "aws":
@@ -107,16 +108,43 @@ class FormatBase(metaclass=ABCMeta):
 
     def create_key(self) -> str:
         batch_start = self.context["batch_start_time"]
+        original_stream_name = self.context["stream_name"]
+        
+        # Check if stream matches any prefix mapping
+        mapped_stream_name = None
+        stream_name_partition = None
+        
+        for prefix, directory_name in self.stream_prefix_mapping.items():
+            if original_stream_name.startswith(prefix):
+                mapped_stream_name = directory_name
+                stream_name_partition = f"stream_name={original_stream_name}"
+                break
+        
         stream_name = (
-            self.context["stream_name"]
-            if self.stream_name_path_override is None
-            else self.stream_name_path_override
+            mapped_stream_name
+            if mapped_stream_name is not None
+            else (
+                self.stream_name_path_override
+                if self.stream_name_path_override is not None
+                else original_stream_name
+            )
         )
+        
         # Insert partition_by values after stream_name if present
         partition_path = ""
-        if self.partition_by:
+        partition_list = []
+        
+        # Add stream_name partition first if we mapped the stream
+        if stream_name_partition:
+            partition_list.append(stream_name_partition)
+            
+        # Then add the configured partition_by values
+        partition_list.extend(self.partition_by)
+            
+        if partition_list:
             # partition_by values are inserted as folders after the stream name
-            partition_path = "/".join(self.partition_by) + "/"
+            partition_path = "/".join(partition_list) + "/"
+        
         # Add tenant prefix if provided
         tenant_prefix = ""
         tenant = self.config.get("tenant")
