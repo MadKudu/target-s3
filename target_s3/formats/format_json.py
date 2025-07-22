@@ -27,7 +27,7 @@ class FormatJson(FormatBase):
         return super()._prepare_records()
 
     def _write(self) -> None:
-        return super()._write(dumps(self.records, cls=JsonSerialize, use_decimal=True))
+        return super()._write(dumps(self.records, cls=JsonSerialize, use_decimal=True, ignore_nan=True))
 
     def run(self) -> None:
         # use default behavior, no additional run steps needed

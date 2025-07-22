@@ -1,27 +1,14 @@
 from datetime import datetime
-from typing import Any
 
-# Optional BSON support for MongoDB ObjectId serialization
-# BSON is not always available, so we gracefully handle the import failure
-try:
-    from bson import ObjectId
-    HAS_BSON = True
-except ImportError:
-    # If BSON is not installed, ObjectId will be None and HAS_BSON will be False
-    # This allows the code to work without BSON dependency
-    ObjectId = None
-    HAS_BSON = False
-
-# Use simplejson instead of standard json for better performance and additional features
-# simplejson provides more control over serialization and handles edge cases better
+from bson import ObjectId
 from simplejson import JSONEncoder, dumps
 
 from target_s3.formats.format_base import FormatBase
 
 
 class JsonSerialize(JSONEncoder):
-    def default(self, obj: Any) -> Any:
-        if HAS_BSON and ObjectId is not None and isinstance(obj, ObjectId):
+    def default(self, obj: any) -> any:
+        if isinstance(obj, ObjectId):
             return str(obj)
         if isinstance(obj, datetime):
             return obj.isoformat()
@@ -39,7 +26,7 @@ class FormatJsonl(FormatBase):
         return super()._prepare_records()
 
     def _write(self) -> None:
-        return super()._write('\n'.join(map(lambda record: dumps(record, cls=JsonSerialize), self.records)))
+        return super()._write('\n'.join(dumps(r, cls=JsonSerialize, ignore_nan=True) for r in self.records))
 
     def run(self) -> None:
         # use default behavior, no additional run steps needed
