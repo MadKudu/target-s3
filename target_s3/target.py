@@ -197,6 +197,12 @@ class Targets3(Target):
             description="List of key-value strings (e.g., 'tenant=${TENANT}') to prepend as partitions in the S3 key path after the stream name.",
         ),
         th.Property(
+            "tenant",
+            th.StringType,
+            required=False,
+            description="Optional tenant string to prefix S3 folder names.",
+        ),
+        th.Property(
             "dynamic_dt",
             th.BooleanType,
             description="Enable dynamic dt generation for each batch. When enabled, any 'dt=' entries in partition_by will use the current batch timestamp instead of static environment variables.",

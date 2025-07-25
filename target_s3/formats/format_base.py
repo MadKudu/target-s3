@@ -112,13 +112,21 @@ class FormatBase(metaclass=ABCMeta):
             if self.stream_name_path_override is None
             else self.stream_name_path_override
         )
+        
         # Insert partition_by values after stream_name if present
         partition_path = ""
         if self.partition_by:
             # Process partition_by values and handle dynamic dt if enabled
             processed_partitions = self._process_partition_values(batch_start)
             partition_path = "/".join(processed_partitions) + "/"
-        folder_path = f"{self.bucket}/{self.prefix}/{stream_name}/" + partition_path
+        
+        # Add tenant prefix if provided
+        tenant_prefix = ""
+        tenant = self.config.get("tenant")
+        if tenant:
+            tenant_prefix = f"{tenant}_"
+        folder_path = f"{self.bucket}/{self.prefix}/{tenant_prefix}{stream_name}/" + partition_path
+        
         file_name = ""
         if self.config["append_date_to_prefix"]:
             grain = DATE_GRAIN[self.config["append_date_to_prefix_grain"].lower()]

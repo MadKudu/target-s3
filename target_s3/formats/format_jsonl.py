@@ -1,12 +1,13 @@
 from datetime import datetime
+import math
+import json
 
 from bson import ObjectId
-from simplejson import JSONEncoder, dumps
 
 from target_s3.formats.format_base import FormatBase
 
 
-class JsonSerialize(JSONEncoder):
+class JsonSerialize(json.JSONEncoder):
     def default(self, obj: any) -> any:
         if isinstance(obj, ObjectId):
             return str(obj)
@@ -26,7 +27,7 @@ class FormatJsonl(FormatBase):
         return super()._prepare_records()
 
     def _write(self) -> None:
-        return super()._write('\n'.join(dumps(r, cls=JsonSerialize, ignore_nan=True) for r in self.records))
+        return super()._write('\n'.join(json.dumps(r, cls=JsonSerialize) for r in self.records))
 
     def run(self) -> None:
         # use default behavior, no additional run steps needed
