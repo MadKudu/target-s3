@@ -1,6 +1,7 @@
 from datetime import datetime
 import math
 import json
+from decimal import Decimal
 
 from bson import ObjectId
 
@@ -13,8 +14,24 @@ class JsonSerialize(json.JSONEncoder):
             return str(obj)
         if isinstance(obj, datetime):
             return obj.isoformat()
+        elif isinstance(obj, Decimal):
+            # Handle Decimal types
+            if obj.is_nan():
+                return "NaN"
+            elif obj.is_infinite():
+                return "Infinity" if obj > 0 else "-Infinity"
+            else:
+                return float(obj)
+        elif isinstance(obj, float):
+            # Handle float special values
+            if math.isnan(obj):
+                return "NaN"
+            elif math.isinf(obj):
+                return "Infinity" if obj > 0 else "-Infinity"
+            else:
+                return obj
         else:
-            raise TypeError(f"Type {type(obj)} not serializable")
+            return str(obj)
 
 
 class FormatJsonl(FormatBase):
